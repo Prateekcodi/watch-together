@@ -1217,6 +1217,9 @@
     /* Own message style */
     .chat-message.own-message {
       align-items: flex-end;
+      max-width: 100%;
+      padding-right: 4px;
+      box-sizing: border-box;
     }
     .chat-message.own-message .message-header {
       flex-direction: row-reverse;
@@ -1227,11 +1230,16 @@
       border-color: rgba(59,130,246,0.2);
       border-radius: 12px 4px 12px 12px;
       color: var(--text);
-      max-width: 85%;
+      max-width: calc(100% - 24px);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
     }
 
     .message-text {
       max-width: 85%;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     /* Reaction message */
