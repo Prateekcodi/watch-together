@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch Together</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Landing Page -->
+  <div id="landing-page" class="page active">
+    <div class="landing-container">
+      <h1>🎬 Watch Together</h1>
+      <p class="tagline">Watch videos together in real-time</p>
+      
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="url">📺 Video URL</button>
+        <button class="mode-btn" data-mode="mse">📤 MSE Upload</button>
+        <button class="mode-btn" data-mode="webrtc">📡 WebRTC Live</button>
+      </div>
+      
+      <p class="mode-description" id="mode-description">
+        Share a video URL - everyone loads the same video. Works with any MP4 link.
+      </p>
+      
+      <div class="landing-options">
+        <div class="option-card">
+          <h3>Create New Room</h3>
+          <p>Start watching as the host</p>
+          <input type="text" id="user-name" placeholder="Your name" maxlength="20">
+          <button id="create-room-btn" class="btn btn-primary">Create Room</button>
+        </div>
+        
+        <div class="option-divider">OR</div>
+        
+        <div class="option-card">
+          <h3>Join Existing Room</h3>
+          <p>Enter a room code</p>
+          <input type="text" id="room-code" placeholder="Room code" maxlength="8">
+          <input type="text" id="join-name" placeholder="Your name" maxlength="20">
+          <button id="join-room-btn" class="btn btn-secondary">Join Room</button>
+        </div>
+      </div>
+      
+      <div class="recent-rooms" id="recent-rooms" style="display: none;">
+        <h3>Recent Rooms</h3>
+        <div id="recent-rooms-list"></div>
+      </div>
+      
+      <div class="livekit-badge" id="livekit-status">
+        <span class="status-dot"></span>
+        <span>Checking WebRTC...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Page -->
+  <div id="room-page" class="page">
+    <div class="room-header">
+      <div class="room-info">
+        <h2>Room: <span id="room-id-display"></span></h2>
+        <button id="copy-invite-btn" class="btn btn-small">📋 Copy Invite</button>
+      </div>
+      <div class="room-stats">
+        <span id="streaming-mode">📺 URL Mode</span>
+        <span id="participant-count">0 viewers</span>
+        <span id="connection-status" class="status disconnected">Disconnected</span>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Video Section -->
+      <div class="video-section">
+        <div class="video-container" id="video-container">
+          <video id="video-player" playsinline webkit-playsinline>
+            Your browser does not support the video tag.
+          </video>
+          
+          <!-- Custom Video Controls -->
+          <div class="custom-video-controls visible" id="custom-controls">
+            <button id="custom-play-btn" class="control-btn">▶️</button>
+            <div class="progress-container">
+              <input type="range" id="video-progress" min="0" max="100" value="0">
+              <span id="time-display">0:00 / 0:00</span>
+            </div>
+            <button id="custom-fullscreen-btn" class="control-btn">⛶</button>
+          </div>
+          
+          <!-- Mobile Chat Button (always visible on mobile when video is loaded) -->
+          <button id="mobile-chat-btn" class="mobile-chat-btn" title="Open Chat">
+            💬
+          </button>
+          
+          <!-- Rotate Button (lock orientation) -->
+          <button id="rotate-btn" class="rotate-btn" title="Lock Rotation">
+            <span id="lock-icon">🔓</span>
+          </button>
+          
+          <!-- Exit Fullscreen Button (mobile) -->
+          <button id="exit-fullscreen-btn" class="exit-fullscreen-btn" title="Exit Fullscreen">
+            ⌕
+          </button>
+          
+          <!-- WebRTC Stats HUD -->
+          <div id="webrtc-hud" style="display: none;">
+            <div class="hud-title">📡 WebRTC Stats</div>
+            <div class="hud-row"><span>Resolution:</span> <span id="hud-res">–</span></div>
+            <div class="hud-row"><span>Bitrate:</span> <span id="hud-bitrate">–</span></div>
+            <div class="hud-row"><span>FPS:</span> <span id="hud-fps">–</span></div>
+            <div class="hud-row"><span>Packet Loss:</span> <span id="hud-packets-lost">–</span></div>
+            <div class="hud-row"><span>Jitter:</span> <span id="hud-jitter">–</span></div>
+          </div>
+          
+        </div>
+        
+        <!-- WebRTC Streaming Controls (Host Only) - OUTSIDE VIDEO CONTAINER -->
+        <div id="webrtc-controls" class="webrtc-controls" style="display: none;">
+          <div class="webrtc-status">
+            <span class="live-indicator">LIVE</span>
+            <span id="viewer-count">0 watching</span>
+          </div>
+          <button id="start-webrtc-camera-btn" class="btn btn-live">
+            📷 Start Camera
+          </button>
+          <button id="start-webrtc-screen-btn" class="btn btn-secondary">
+            🖥️ Start Screen Share
+          </button>
+          <button id="stop-webrtc-btn" class="btn btn-danger" style="display: none;">
+            ⏹ Stop Stream
+          </button>
+        </div>
+        
+        <!-- Local Preview for Host (shows their own camera) -->
+        <div id="local-preview-container" class="local-preview-container" style="display: none;">
+          <video id="local-preview" autoplay muted playsinline></video>
+          <span class="preview-label">Your Camera</span>
+        </div>
+        
+        <!-- Viewer Notice -->
+        <div id="viewer-notice" class="viewer-notice" style="display: none;">
+          <p id="viewer-notice-text">Host is controlling playback - your video will sync automatically</p>
+          <button id="join-webrtc-btn" class="btn btn-secondary" style="display: none;">
+            Join WebRTC Stream
+          </button>
+        </div>
+        
+        <!-- Host Controls (URL Mode) -->
+        <div id="host-controls" class="host-controls" style="display: none;">
+          <!-- URL Mode Controls -->
+          <div class="video-url-input" id="url-input-section">
+            <input type="text" id="video-url" placeholder="Enter video URL (MP4) or select from uploads">
+            <button id="load-video-btn" class="btn btn-small">Load Video</button>
+          </div>
+          
+          <!-- Uploaded Videos Section -->
+          <div class="uploaded-videos-section" id="uploaded-videos-section">
+            <h4>📁 Uploaded Videos <span id="video-count" class="video-count">(0)</span></h4>
+            <div id="uploaded-videos-list" class="uploaded-videos-list">
+              <p class="loading-text">Loading videos...</p>
+            </div>
+          </div>
+          
+          <!-- MSE Upload Section (Progressive Upload) -->
+          <div class="mse-upload-section" id="mse-upload-section" style="display: none;">
+            <h4>📤 Progressive Upload (MSE)</h4>
+            <p class="mse-info">Upload video in chunks - viewers can start watching before upload finishes!</p>
+            
+            <!-- MSE Drag & Drop Zone -->
+            <div id="mse-drop-zone" class="drop-zone mse-drop-zone">
+              <div class="drop-zone-content">
+                <span class="drop-icon">🎬</span>
+                <p>Drag & drop video file for MSE streaming</p>
+                <p class="drop-hint">or click to browse (MP4 recommended)</p>
+                <input type="file" id="mse-file-input" accept="video/mp4,video/*" style="display: none;">
+              </div>
+              
+              <!-- MSE Upload Progress -->
+              <div id="mse-upload-progress" class="upload-progress" style="display: none;">
+                <div class="progress-bar">
+                  <div id="mse-progress-fill" class="progress-fill"></div>
+                </div>
+                <p id="mse-upload-status">Initializing...</p>
+                <div id="mse-buffer-status" class="buffer-status"></div>
+              </div>
+            </div>
+            
+            <!-- MSE Viewer Notice -->
+            <div id="mse-viewer-notice" class="viewer-notice" style="display: none;">
+              <p>📤 Host is uploading video progressively</p>
+              <p id="mse-upload-progress-text">Waiting for upload...</p>
+              <div class="progress-bar small">
+                <div id="mse-viewer-progress" class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Drag & Drop Upload Zone (Legacy) -->
+          <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-content">
+              <span class="drop-icon">📤</span>
+              <p>Drag & drop video file here</p>
+              <p class="drop-hint">or click to browse</p>
+              <input type="file" id="file-input" accept="video/*" style="display: none;">
+            </div>
+            <div id="upload-progress" class="upload-progress" style="display: none;">
+              <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+              </div>
+              <p id="upload-status">Uploading...</p>
+            </div>
+          </div>
+          
+          <p class="host-notice">You are the host - others will sync to your video</p>
+          <div id="video-info" class="video-info" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Chat Section -->
+      <div class="chat-section" id="chat-section">
+        <div class="chat-header">
+          <h3>Chat</h3>
+          <button id="chat-toggle" class="btn btn-small" style="display: none;">🗗</button>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+          <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500">
+          <button id="send-chat-btn" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+      
+      <!-- Exit Theater Mode Button -->
+      <button id="exit-theater-btn" class="exit-theater-btn">Exit Fullscreen ⌨</button>
+      
+      <!-- Chat Overlay for Fullscreen Mode -->
+      <div id="chat-overlay" class="chat-overlay">
+        <div class="chat-overlay-header">
+          <span class="chat-overlay-title">Chat</span>
+          <button id="chat-overlay-close" class="chat-overlay-close">✕</button>
+        </div>
+        <div id="chat-overlay-content" class="chat-overlay-content">
+          <div id="chat-overlay-messages" class="chat-messages"></div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chat-overlay-input" placeholder="Type a message..." maxlength="500">
+          <button id="chat-overlay-send" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-footer">
+      <button id="leave-room-btn" class="btn btn-danger">Leave Room</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+  <script src="mse-player.js"></script>
+  <script src="pure-webrtc.js"></script>
+</body>
+</html>
