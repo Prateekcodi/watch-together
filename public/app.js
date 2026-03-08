@@ -2007,6 +2007,30 @@ class WatchTogether {
     
     // Sync to overlay if open
     this.syncChatOverlay();
+    
+    // Show notification if chat is hidden (mobile or fullscreen)
+    const chatSection = document.getElementById('chat-section');
+    const chatHidden = window.innerWidth <= 900 && !chatSection?.classList.contains('open');
+    const isFullscreen = document.fullscreenElement || document.body.classList.contains('theater-mode');
+    
+    if (chatHidden || isFullscreen) {
+      // Don't show notification for own messages
+      if (message.userName !== this.userName) {
+        // Remove existing notification first
+        document.querySelector('.msg-notification')?.remove();
+        
+        const notif = document.createElement('div');
+        notif.className = 'msg-notification';
+        notif.innerHTML = `
+          <div class="notif-name">${this.escapeHtml(message.userName)}</div>
+          <div class="notif-text">${this.escapeHtml(message.message)}</div>
+        `;
+        document.body.appendChild(notif);
+        
+        // Auto remove after animation ends
+        setTimeout(() => notif.remove(), 4000);
+      }
+    }
   }
 
   formatVideoTime(seconds) {

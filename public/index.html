@@ -112,6 +112,13 @@
       0%, 100% { box-shadow: 0 0 0 0 var(--red-glow); }
       50%       { box-shadow: 0 0 0 8px transparent; }
     }
+    @keyframes msg-pop {
+      0%   { transform: translateX(120%); opacity: 0; }
+      15%  { transform: translateX(-8px); opacity: 1; }
+      25%  { transform: translateX(0); }
+      85%  { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(120%); opacity: 0; }
+    }
     @keyframes scan-line {
       0%   { top: 0; opacity: 0.6; }
       100% { top: 100%; opacity: 0; }
@@ -1242,6 +1249,39 @@
     .toast.error   { background: rgba(230,48,48,0.12); border-color: rgba(230,48,48,0.3); color: #f87171; }
     .toast.warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
     .toast.info    { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+
+    /* Message notification */
+    .msg-notification {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: rgba(15,15,15,0.95);
+      border: 1px solid var(--border2);
+      border-left: 3px solid var(--red);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      max-width: 280px;
+      z-index: 9997;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: msg-pop 4s ease forwards;
+      pointer-events: none;
+    }
+
+    .msg-notification .notif-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: 0.05em;
+      margin-bottom: 3px;
+    }
+
+    .msg-notification .notif-text {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* Loading state */
     .loading-text {
