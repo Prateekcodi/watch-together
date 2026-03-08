@@ -1584,6 +1584,30 @@
       color: #f0f0f0 !important;
       background: rgba(59,130,246,0.15) !important;
     }
+
+    /* Fix chat scrolling */
+    #room-page {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .main-content {
+      overflow: hidden;
+      height: calc(100vh - 110px);
+    }
+
+    .chat-section {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #chat-messages {
+      flex: 1 1 0;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+      max-height: none !important;
+    }
   </style>
 </head>
 <body>
