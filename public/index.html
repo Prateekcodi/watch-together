@@ -1055,93 +1055,244 @@
       display: flex;
       flex-direction: column;
       background: var(--bg2);
-      animation: slide-right 0.5s 0.2s ease both;
       position: relative;
-      min-height: 0; /* Important for flex scrolling */
+      min-height: 0;
     }
 
     .chat-header {
-      padding: 16px 20px;
+      padding: 14px 16px 10px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(8,8,8,0.5);
+      background: rgba(8,8,8,0.7);
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .chat-header h3 {
       font-family: var(--font-head);
-      font-size: 20px;
+      font-size: 18px;
       letter-spacing: 0.08em;
       color: var(--text2);
       font-weight: 400;
+      flex: 1;
     }
 
+    /* Quick reactions bar */
+    .quick-reactions {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .quick-reactions::-webkit-scrollbar { display: none; }
+
+    .reaction-btn {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .reaction-btn:hover {
+      background: rgba(230,48,48,0.15);
+      border-color: var(--red);
+      transform: scale(1.15);
+    }
+    .reaction-btn:active { transform: scale(0.95); }
+
+    /* Quick messages bar */
+    .quick-messages {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .quick-messages::-webkit-scrollbar { display: none; }
+
+    .quick-msg-btn {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-family: var(--font-body);
+      color: var(--text2);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .quick-msg-btn:hover {
+      background: rgba(230,48,48,0.12);
+      border-color: var(--red);
+      color: var(--text);
+    }
+
+    /* Messages */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 2px;
       scrollbar-width: thin;
       scrollbar-color: var(--bg4) transparent;
-      min-height: 0; /* Important for flex scrolling */
+      min-height: 0;
     }
-
-    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar { width: 3px; }
     .chat-messages::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
 
     .chat-message {
-      animation: fade-up 0.3s ease;
+      animation: fade-up 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      padding: 2px 0;
+    }
+
+    /* Group consecutive messages from same user */
+    .chat-message.same-user .message-header { display: none; }
+    .chat-message.same-user .message-text {
+      border-radius: 4px 12px 12px 4px;
+      margin-top: 2px;
     }
 
     .message-header {
       display: flex;
       align-items: baseline;
-      gap: 8px;
-      margin-bottom: 4px;
+      gap: 6px;
+      margin-bottom: 3px;
+      padding: 0 2px;
     }
 
     .user-name {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--red);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
     }
 
+    /* Different colors for different users */
+    .user-name[data-self="true"] { color: #60a5fa; }
+
     .message-time {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text3);
       font-family: var(--font-mono);
     }
 
     .message-text {
       font-size: 13px;
-      color: var(--text2);
+      color: var(--text);
       line-height: 1.5;
-      background: var(--glass);
+      background: var(--bg3);
       padding: 8px 12px;
-      border-radius: 0 var(--radius) var(--radius) var(--radius);
+      border-radius: 4px 12px 12px 12px;
       border: 1px solid var(--border);
       word-break: break-word;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .message-text:hover { background: var(--bg4); }
+
+    /* Own message style */
+    .chat-message.own-message {
+      align-items: flex-end;
+    }
+    .chat-message.own-message .message-header {
+      flex-direction: row-reverse;
+    }
+    .chat-message.own-message .user-name { color: #60a5fa; }
+    .chat-message.own-message .message-text {
+      background: rgba(59,130,246,0.12);
+      border-color: rgba(59,130,246,0.2);
+      border-radius: 12px 4px 12px 12px;
+      color: var(--text);
+    }
+
+    /* Reaction message */
+    .chat-message.is-reaction .message-text {
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      padding: 2px 4px;
+      line-height: 1;
     }
 
     .video-timestamp {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text3);
       font-family: var(--font-mono);
-      margin-top: 3px;
+      margin-top: 2px;
+      padding: 0 4px;
     }
 
+    /* Chat input */
     .chat-input-container {
-      padding: 16px;
+      padding: 10px 12px;
       border-top: 1px solid var(--border);
       display: flex;
       gap: 8px;
-      background: rgba(8,8,8,0.5);
+      background: rgba(8,8,8,0.6);
+      align-items: flex-end;
+      flex-shrink: 0;
     }
+
+    .chat-input-container input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .chat-input-container input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 2px var(--red-glow);
+    }
+
+    #send-chat-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      padding: 0;
+      flex-shrink: 0;
+      font-size: 16px;
+      background: var(--red);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(230,48,48,0.4);
+    }
+    #send-chat-btn:hover { transform: scale(1.08); box-shadow: 0 4px 14px rgba(230,48,48,0.5); }
+    #send-chat-btn:active { transform: scale(0.94); }
 
     /* Theater / fullscreen */
     .exit-theater-btn {
@@ -1588,10 +1739,34 @@
         <h3>Live Chat</h3>
         <button id="chat-toggle" class="btn btn-small" style="display:none">✕</button>
       </div>
+
+      <!-- Reactions -->
+      <div class="quick-reactions">
+        <button class="reaction-btn" data-reaction="🔥">🔥</button>
+        <button class="reaction-btn" data-reaction="😂">😂</button>
+        <button class="reaction-btn" data-reaction="😮">😮</button>
+        <button class="reaction-btn" data-reaction="❤️">❤️</button>
+        <button class="reaction-btn" data-reaction="👏">👏</button>
+        <button class="reaction-btn" data-reaction="💀">💀</button>
+        <button class="reaction-btn" data-reaction="🗿">🗿</button>
+        <button class="reaction-btn" data-reaction="👀">👀</button>
+      </div>
+
+      <!-- Quick messages -->
+      <div class="quick-messages">
+        <button class="quick-msg-btn">lol 😂</button>
+        <button class="quick-msg-btn">omg!</button>
+        <button class="quick-msg-btn">what scene is this?</button>
+        <button class="quick-msg-btn">so good 🔥</button>
+        <button class="quick-msg-btn">pause!</button>
+        <button class="quick-msg-btn">rewind pls</button>
+      </div>
+
       <div id="chat-messages" class="chat-messages"></div>
+
       <div class="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Say something…" maxlength="500">
-        <button id="send-chat-btn" class="btn btn-primary">↑</button>
+        <input type="text" id="chat-input" placeholder="Say something…" maxlength="500" autocomplete="off">
+        <button id="send-chat-btn">↑</button>
       </div>
     </div>
 

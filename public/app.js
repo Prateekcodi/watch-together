@@ -112,6 +112,31 @@ class WatchTogether {
       if (e.key === 'Enter') this.sendChat();
     });
     
+    // Quick reaction buttons
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const reaction = btn.dataset.reaction;
+        if (this.socketConnected) {
+          this.socket.emit('chat:send', {
+            roomId: this.roomId,
+            message: reaction,
+            isReaction: true
+          });
+        }
+      });
+    });
+
+    // Quick message buttons
+    document.querySelectorAll('.quick-msg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById('chat-input');
+        input.value = btn.textContent;
+        input.focus();
+        // Auto send
+        this.sendChat();
+      });
+    });
+    
     // WebRTC streaming buttons
     document.getElementById('start-webrtc-camera-btn').addEventListener('click', () => {
       this.webrtcMode = 'camera';
@@ -1980,7 +2005,9 @@ class WatchTogether {
   addChatMessage(message) {
     const container = document.getElementById('chat-messages');
     const messageEl = document.createElement('div');
-    messageEl.className = 'chat-message';
+    const isOwn = message.userName === this.userName;
+    const isReaction = message.isReaction || /^\p{Emoji}+$/u.test(message.message.trim());
+    messageEl.className = 'chat-message' + (isOwn ? ' own-message' : '') + (isReaction ? ' is-reaction' : '');
     messageEl.dataset.messageId = message.id;
     
     const time = new Date(message.timestamp);
