@@ -1575,16 +1575,13 @@
       border-radius: 0;
     }
 
-    /* Force message text visible */
-    .chat-message .message-text,
-    .chat-message.own-message .message-text {
+    /* FORCE FIX */
+    #chat-messages .chat-message .message-text {
       color: #f0f0f0 !important;
-      opacity: 1 !important;
     }
-
-    .chat-message .message-text {
-      min-height: 36px;
-      display: block;
+    #chat-messages .chat-message.own-message .message-text {
+      color: #f0f0f0 !important;
+      background: rgba(59,130,246,0.2) !important;
     }
   </style>
 </head>
