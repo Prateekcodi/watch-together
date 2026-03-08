@@ -2,260 +2,1571 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Watch Together</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>WatchTogether — Watch. Together.</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:       #e63030;
+      --red-glow:  #e6303055;
+      --red-dim:   #a82222;
+      --bg:        #080808;
+      --bg2:       #0f0f0f;
+      --bg3:       #161616;
+      --bg4:       #1e1e1e;
+      --glass:     rgba(255,255,255,0.04);
+      --glass2:    rgba(255,255,255,0.07);
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.14);
+      --text:      #f0f0f0;
+      --text2:     #a0a0a0;
+      --text3:     #606060;
+      --success:   #22c55e;
+      --warning:   #f59e0b;
+      --info:      #3b82f6;
+      --radius:    12px;
+      --radius-lg: 20px;
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --shadow:    0 8px 32px rgba(0,0,0,0.6);
+      --shadow-red:0 0 40px rgba(230,48,48,0.25);
+    }
+
+    html { height: 100%; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Film grain overlay ───────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── Animated background particles ───────────────────── */
+    #particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--red);
+      opacity: 0;
+      animation: float-particle linear infinite;
+    }
+
+    @keyframes float-particle {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 0.15; }
+      90%  { opacity: 0.05; }
+      100% { transform: translateY(-20px) scale(1); opacity: 0; }
+    }
+
+    /* ── Page system ──────────────────────────────────────── */
+    .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+    .page.active { display: flex; flex-direction: column; }
+
+    /* ── Animations ───────────────────────────────────────── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slide-right {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scale-in {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 var(--red-glow); }
+      50%       { box-shadow: 0 0 0 8px transparent; }
+    }
+    @keyframes scan-line {
+      0%   { top: 0; opacity: 0.6; }
+      100% { top: 100%; opacity: 0; }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes live-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ══════════════════════════════════════════════════════
+       LANDING PAGE
+    ══════════════════════════════════════════════════════ */
+    #landing-page {
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(230,48,48,0.12) 0%, transparent 60%),
+        var(--bg);
+    }
+
+    .landing-container {
+      width: 100%;
+      max-width: 900px;
+      animation: fade-up 0.7s ease both;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--glass);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 24px;
+      animation: fade-up 0.7s 0.1s ease both;
+    }
+
+    .hero-eyebrow span.dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: live-blink 1.4s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(56px, 10vw, 110px);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      margin-bottom: 20px;
+      animation: fade-up 0.7s 0.15s ease both;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--red);
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--text2);
+      font-weight: 300;
+      max-width: 400px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+      animation: fade-up 0.7s 0.2s ease both;
+    }
+
+    /* Mode selector */
+    .mode-selector {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      animation: fade-up 0.7s 0.25s ease both;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      background-size: 200% 100%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .mode-btn:hover { border-color: var(--border2); color: var(--text); }
+    .mode-btn:hover::after { opacity: 1; animation: shimmer 1s ease; }
+
+    .mode-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+      box-shadow: var(--shadow-red);
+    }
+
+    .mode-description {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text3);
+      margin-bottom: 40px;
+      min-height: 20px;
+      animation: fade-in 0.3s ease;
+    }
+
+    /* Cards */
+    .landing-options {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
+      align-items: stretch;
+      animation: fade-up 0.7s 0.3s ease both;
+    }
+
+    .option-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .option-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+
+    /* Scan line effect on hover */
+    .option-card::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      top: -4px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .option-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .option-card:hover::after {
+      opacity: 1;
+      animation: scan-line 1.5s ease-in-out infinite;
+    }
+
+    .option-card h3 {
+      font-family: var(--font-head);
+      font-size: 28px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+    }
+
+    .option-card p {
+      font-size: 13px;
+      color: var(--text3);
+      margin: 0;
+      flex-grow: 0;
+    }
+
+    .option-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text3);
+      text-transform: uppercase;
+    }
+
+    /* Inputs */
+    input[type="text"], input[type="url"] {
+      font-family: var(--font-body);
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-glow);
+    }
+
+    input::placeholder { color: var(--text3); }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+
+    .btn:hover::after { background: rgba(255,255,255,0.06); }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--red);
+      color: white;
+      box-shadow: 0 4px 16px rgba(230,48,48,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(230,48,48,0.5); }
+
+    .btn-secondary {
+      background: var(--glass2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-danger {
+      background: rgba(230,48,48,0.15);
+      color: var(--red);
+      border: 1px solid rgba(230,48,48,0.3);
+    }
+    .btn-danger:hover { background: rgba(230,48,48,0.25); }
+
+    .btn-live {
+      background: linear-gradient(135deg, #e63030, #a82222);
+      color: white;
+      box-shadow: 0 4px 20px rgba(230,48,48,0.4);
+    }
+
+    .btn-small {
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      background: var(--glass);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .btn-small:hover { color: var(--text); border-color: var(--border2); }
+
+    /* WebRTC status badge */
+    .livekit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+      font-size: 12px;
+      color: var(--text3);
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      animation: fade-up 0.7s 0.4s ease both;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: background 0.3s;
+    }
+
+    .livekit-badge.loaded .status-dot { background: var(--success); }
+    .livekit-badge.loaded { color: var(--text2); }
+
+    /* Recent rooms */
+    .recent-rooms {
+      margin-top: 32px;
+      animation: fade-up 0.5s ease both;
+    }
+
+    .recent-rooms h3 {
+      font-family: var(--font-head);
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      margin-bottom: 12px;
+    }
+
+    #recent-rooms-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .recent-room-item {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .recent-room-item:hover {
+      border-color: var(--red);
+      color: var(--text);
+    }
+
+    .recent-room-item strong {
+      display: block;
+      font-family: var(--font-mono);
+      color: var(--red);
+      font-size: 14px;
+      letter-spacing: 0.1em;
+    }
+
+    .recent-room-item small { color: var(--text3); font-size: 11px; }
+
+    /* ══════════════════════════════════════════════════════
+       ROOM PAGE
+    ══════════════════════════════════════════════════════ */
+    #room-page {
+      background:
+        radial-gradient(ellipse 60% 40% at 80% 0%, rgba(230,48,48,0.06) 0%, transparent 50%),
+        var(--bg);
+      flex-direction: column;
+    }
+
+    /* Header */
+    .room-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: fade-in 0.4s ease;
+    }
+
+    .room-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .room-info h2 {
+      font-family: var(--font-head);
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      color: var(--text2);
+      font-weight: 400;
+    }
+
+    .room-info h2 span {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      letter-spacing: 0.12em;
+    }
+
+    .room-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .room-stats span {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    .status {
+      font-size: 12px !important;
+      padding: 5px 12px !important;
+      border-radius: 100px !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status.connected { color: var(--success); background: rgba(34,197,94,0.1) !important; border-color: rgba(34,197,94,0.3) !important; }
+    .status.disconnected { color: var(--text3); }
+
+    /* Main content */
+    .main-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* Video section */
+    .video-section {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      animation: fade-in 0.5s 0.1s ease both;
+    }
+
+    .video-container {
+      position: relative;
+      background: #000;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 16/9;
+      box-shadow: var(--shadow);
+    }
+
+    .video-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Custom controls */
+    .custom-video-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      padding: 32px 16px 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+      transition: opacity 0.3s;
+    }
+
+    .custom-video-controls.hidden { opacity: 0; pointer-events: none; }
+
+    .control-btn {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      border-radius: 8px;
+      width: 38px; height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      color: white;
+      backdrop-filter: blur(8px);
+    }
+
+    .control-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.05); }
+
+    .progress-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #video-progress {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+      outline: none;
+      cursor: pointer;
+      transition: height 0.2s;
+    }
+
+    #video-progress:hover { height: 6px; }
+
+    #video-progress::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--red);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--red-glow);
+    }
+
+    #video-progress::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, var(--red) 0%, rgba(255,255,255,0.2) 0%);
+      border-radius: 4px;
+    }
+
+    #time-display {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+    }
+
+    /* Floating buttons on video */
+    .mobile-chat-btn {
+      position: absolute;
+      bottom: 70px; right: 12px;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--border2);
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+
+    .mobile-chat-btn.visible { display: flex; }
+    .mobile-chat-btn:hover { background: rgba(230,48,48,0.5); }
+
+    .rotate-btn, .exit-fullscreen-btn {
+      position: absolute;
+      top: 12px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      width: 36px; height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+
+    .rotate-btn { right: 12px; }
+    .exit-fullscreen-btn { right: 56px; display: none; }
+    .rotate-btn:hover, .exit-fullscreen-btn:hover { background: rgba(230,48,48,0.4); color: white; }
+
+    /* WebRTC HUD */
+    #webrtc-hud {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      color: var(--text2);
+      min-width: 160px;
+    }
+
+    .hud-title {
+      color: var(--red);
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hud-row:last-child { border: none; }
+    .hud-row span:last-child { color: var(--text); }
+
+    /* WebRTC controls */
+    .webrtc-controls {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .webrtc-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .live-indicator {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: white;
+      background: var(--red);
+      padding: 3px 8px;
+      border-radius: 4px;
+      animation: live-blink 1.2s ease infinite;
+    }
+
+    .live-indicator.off {
+      background: var(--bg4);
+      color: var(--text3);
+      animation: none;
+    }
+
+    #viewer-count {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    /* Local preview */
+    .local-preview-container {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      max-width: 200px;
+    }
+
+    .local-preview-container video {
+      width: 100%;
+      display: block;
+    }
+
+    .preview-label {
+      position: absolute;
+      bottom: 6px; left: 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      font-family: var(--font-mono);
+    }
+
+    /* Viewer notice */
+    .viewer-notice {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    #viewer-notice-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    /* Host controls */
+    .host-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .video-url-input {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .uploaded-videos-section h4 {
+      font-family: var(--font-head);
+      font-size: 16px;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .video-count {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .uploaded-videos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .uploaded-video-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .uploaded-video-item:hover { border-color: var(--red); background: rgba(230,48,48,0.05); }
+
+    .video-icon { font-size: 18px; }
+
+    .video-details { flex: 1; min-width: 0; }
+
+    .video-name {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .video-size { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+    .video-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .delete-video-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.4;
+      transition: opacity 0.2s;
+    }
+
+    .delete-video-btn:hover { opacity: 1; }
+
+    .play-icon { font-size: 14px; opacity: 0.4; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--glass);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--red);
+      background: rgba(230,48,48,0.04);
+    }
+
+    .drop-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+
+    .drop-zone p { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+    .drop-hint { font-size: 11px; color: var(--text3) !important; }
+
+    .upload-progress { padding: 8px 0; }
+
+    .progress-bar {
+      background: var(--bg4);
+      border-radius: 100px;
+      height: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red-dim), var(--red));
+      border-radius: 100px;
+      width: 0%;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 40px; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.4));
+      animation: shimmer 1.5s ease infinite;
+    }
+
+    #upload-status, #mse-upload-status {
+      font-size: 12px;
+      color: var(--text3);
+      font-family: var(--font-mono);
+    }
+
+    .host-notice {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+    }
+
+    /* Video info */
+    .video-info {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child { border: none; }
+    .info-label { color: var(--text3); }
+    .info-value { color: var(--text); font-family: var(--font-mono); font-size: 11px; }
+
+    /* MSE sections */
+    .mse-upload-section h4 {
+      font-family: var(--font-head);
+      font-size: 16px;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+      margin-bottom: 6px;
+    }
+
+    .mse-info { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+
+    .mse-drop-zone { border-color: rgba(34,197,94,0.3); }
+    .mse-drop-zone:hover { border-color: var(--success); }
+
+    .buffer-status { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+    /* ── Chat ─────────────────────────────────────────────── */
+    .chat-section {
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg2);
+      animation: slide-right 0.5s 0.2s ease both;
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,8,8,0.5);
+    }
+
+    .chat-header h3 {
+      font-family: var(--font-head);
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      font-weight: 400;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg4) transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    .chat-message {
+      animation: fade-up 0.3s ease;
+    }
+
+    .message-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: 0.02em;
+    }
+
+    .message-time {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: var(--font-mono);
+    }
+
+    .message-text {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.5;
+      background: var(--glass);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius) var(--radius) var(--radius);
+      border: 1px solid var(--border);
+      word-break: break-word;
+    }
+
+    .video-timestamp {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: var(--font-mono);
+      margin-top: 3px;
+    }
+
+    .chat-input-container {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      background: rgba(8,8,8,0.5);
+    }
+
+    /* Theater / fullscreen */
+    .exit-theater-btn {
+      display: none;
+      position: fixed;
+      top: 16px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text2);
+      padding: 8px 20px;
+      font-size: 13px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+    }
+
+    body.theater-mode .exit-theater-btn { display: block; }
+
+    body.theater-mode .main-content { grid-template-columns: 1fr; }
+    body.theater-mode .chat-section { display: none; }
+    body.theater-mode #room-page { background: #000; }
+
+    /* Chat overlay */
+    .chat-overlay {
+      position: fixed;
+      bottom: 80px; right: 16px;
+      width: 300px;
+      max-height: 400px;
+      background: rgba(10,10,10,0.95);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      animation: scale-in 0.2s ease;
+    }
+
+    .chat-overlay.visible { display: flex; }
+
+    .chat-overlay-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-overlay-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+    }
+
+    .chat-overlay-close {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .chat-overlay-close:hover { color: var(--text); }
+
+    .chat-overlay-content { flex: 1; overflow-y: auto; }
+
+    .chat-input-area {
+      padding: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Room footer */
+    .room-footer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(8,8,8,0.8);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 24px; right: 24px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 9998;
+      animation: fade-up 0.3s ease;
+      backdrop-filter: blur(12px);
+      border: 1px solid;
+      max-width: 320px;
+    }
+
+    .toast.success { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.3); color: #4ade80; }
+    .toast.error   { background: rgba(230,48,48,0.12); border-color: rgba(230,48,48,0.3); color: #f87171; }
+    .toast.warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
+    .toast.info    { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+
+    /* Loading state */
+    .loading-text {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      padding: 16px;
+      font-family: var(--font-mono);
+    }
+
+    .loading-text::after {
+      content: '...';
+      animation: shimmer 1.2s ease infinite;
+    }
+
+    .no-videos {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      padding: 16px;
+    }
+
+    /* Tap overlay for WebRTC */
+    #webrtc-tap-overlay {
+      border-radius: var(--radius-lg);
+    }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .main-content { grid-template-columns: 1fr; }
+
+      .chat-section {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        max-height: 300px;
+        display: none;
+        animation: none;
+      }
+
+      .chat-section.open { display: flex; }
+
+      #chat-toggle { display: inline-flex !important; }
+
+      .mobile-chat-btn { display: flex !important; }
+
+      .landing-options {
+        grid-template-columns: 1fr;
+      }
+
+      .option-divider {
+        padding: 8px 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .room-header { flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+
+      .video-section { padding: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 52px; }
+      .room-stats { display: none; }
+    }
+
+    /* Fullscreen styles */
+    #video-container:fullscreen,
+    #video-container:-webkit-full-screen {
+      border-radius: 0;
+      border: none;
+    }
+
+    #video-container:fullscreen #custom-controls,
+    #video-container:-webkit-full-screen #custom-controls {
+      border-radius: 0;
+    }
+  </style>
 </head>
 <body>
-  <!-- Landing Page -->
-  <div id="landing-page" class="page active">
-    <div class="landing-container">
-      <h1>🎬 Watch Together</h1>
-      <p class="tagline">Watch videos together in real-time</p>
-      
+
+<!-- Animated particles -->
+<div id="particles"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════════════════════════ -->
+<div id="landing-page" class="page active">
+  <div class="landing-container">
+
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        Real-time sync · No signup needed
+      </div>
+      <h1>WATCH<br><em>TOGETHER</em></h1>
+      <p>Create a room, share the link, and watch any video in perfect sync with friends anywhere in the world.</p>
+
       <div class="mode-selector">
         <button class="mode-btn active" data-mode="url">📺 Video URL</button>
         <button class="mode-btn" data-mode="mse">📤 MSE Upload</button>
         <button class="mode-btn" data-mode="webrtc">📡 WebRTC Live</button>
       </div>
-      
       <p class="mode-description" id="mode-description">
-        Share a video URL - everyone loads the same video. Works with any MP4 link.
+        Share a video URL — everyone loads the same video. Works with any MP4 link.
       </p>
-      
-      <div class="landing-options">
-        <div class="option-card">
-          <h3>Create New Room</h3>
-          <p>Start watching as the host</p>
-          <input type="text" id="user-name" placeholder="Your name" maxlength="20">
-          <button id="create-room-btn" class="btn btn-primary">Create Room</button>
-        </div>
-        
-        <div class="option-divider">OR</div>
-        
-        <div class="option-card">
-          <h3>Join Existing Room</h3>
-          <p>Enter a room code</p>
-          <input type="text" id="room-code" placeholder="Room code" maxlength="8">
-          <input type="text" id="join-name" placeholder="Your name" maxlength="20">
-          <button id="join-room-btn" class="btn btn-secondary">Join Room</button>
-        </div>
+    </div>
+
+    <div class="landing-options">
+      <div class="option-card">
+        <h3>Create Room</h3>
+        <p>Start watching as the host</p>
+        <input type="text" id="user-name" placeholder="Your name" maxlength="20" autocomplete="off">
+        <button id="create-room-btn" class="btn btn-primary" style="width:100%">Create Room →</button>
       </div>
-      
-      <div class="recent-rooms" id="recent-rooms" style="display: none;">
-        <h3>Recent Rooms</h3>
-        <div id="recent-rooms-list"></div>
+
+      <div class="option-divider">OR</div>
+
+      <div class="option-card">
+        <h3>Join Room</h3>
+        <p>Enter a room code to join</p>
+        <input type="text" id="room-code" placeholder="Room code" maxlength="8" autocomplete="off" style="letter-spacing:0.1em;text-transform:uppercase">
+        <input type="text" id="join-name" placeholder="Your name" maxlength="20" autocomplete="off">
+        <button id="join-room-btn" class="btn btn-secondary" style="width:100%">Join Room →</button>
       </div>
-      
+    </div>
+
+    <div style="text-align:center">
       <div class="livekit-badge" id="livekit-status">
         <span class="status-dot"></span>
-        <span>Checking WebRTC...</span>
+        <span>Checking WebRTC…</span>
       </div>
+    </div>
+
+    <div class="recent-rooms" id="recent-rooms" style="display:none">
+      <h3>Recent Rooms</h3>
+      <div id="recent-rooms-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ROOM PAGE
+══════════════════════════════════════════════════════════ -->
+<div id="room-page" class="page">
+
+  <div class="room-header">
+    <div class="room-info">
+      <h2>Room <span id="room-id-display"></span></h2>
+      <button id="copy-invite-btn" class="btn btn-small">📋 Invite</button>
+    </div>
+    <div class="room-stats">
+      <span id="streaming-mode">📺 URL Mode</span>
+      <span id="participant-count">1 viewer</span>
+      <span id="connection-status" class="status disconnected">Disconnected</span>
     </div>
   </div>
 
-  <!-- Room Page -->
-  <div id="room-page" class="page">
-    <div class="room-header">
-      <div class="room-info">
-        <h2>Room: <span id="room-id-display"></span></h2>
-        <button id="copy-invite-btn" class="btn btn-small">📋 Copy Invite</button>
-      </div>
-      <div class="room-stats">
-        <span id="streaming-mode">📺 URL Mode</span>
-        <span id="participant-count">0 viewers</span>
-        <span id="connection-status" class="status disconnected">Disconnected</span>
-      </div>
-    </div>
+  <div class="main-content">
 
-    <div class="main-content">
-      <!-- Video Section -->
-      <div class="video-section">
-        <div class="video-container" id="video-container">
-          <video id="video-player" playsinline webkit-playsinline>
-            Your browser does not support the video tag.
-          </video>
-          
-          <!-- Custom Video Controls -->
-          <div class="custom-video-controls visible" id="custom-controls">
-            <button id="custom-play-btn" class="control-btn">▶️</button>
-            <div class="progress-container">
-              <input type="range" id="video-progress" min="0" max="100" value="0">
-              <span id="time-display">0:00 / 0:00</span>
-            </div>
-            <button id="custom-fullscreen-btn" class="control-btn">⛶</button>
+    <!-- Video -->
+    <div class="video-section">
+      <div class="video-container" id="video-container">
+        <video id="video-player" playsinline webkit-playsinline></video>
+
+        <div class="custom-video-controls visible" id="custom-controls">
+          <button id="custom-play-btn" class="control-btn">▶️</button>
+          <div class="progress-container">
+            <input type="range" id="video-progress" min="0" max="100" value="0">
+            <span id="time-display">0:00 / 0:00</span>
           </div>
-          
-          <!-- Mobile Chat Button (always visible on mobile when video is loaded) -->
-          <button id="mobile-chat-btn" class="mobile-chat-btn" title="Open Chat">
-            💬
-          </button>
-          
-          <!-- Rotate Button (lock orientation) -->
-          <button id="rotate-btn" class="rotate-btn" title="Lock Rotation">
-            <span id="lock-icon">🔓</span>
-          </button>
-          
-          <!-- Exit Fullscreen Button (mobile) -->
-          <button id="exit-fullscreen-btn" class="exit-fullscreen-btn" title="Exit Fullscreen">
-            ⌕
-          </button>
-          
-          <!-- WebRTC Stats HUD -->
-          <div id="webrtc-hud" style="display: none;">
-            <div class="hud-title">📡 WebRTC Stats</div>
-            <div class="hud-row"><span>Resolution:</span> <span id="hud-res">–</span></div>
-            <div class="hud-row"><span>Bitrate:</span> <span id="hud-bitrate">–</span></div>
-            <div class="hud-row"><span>FPS:</span> <span id="hud-fps">–</span></div>
-            <div class="hud-row"><span>Packet Loss:</span> <span id="hud-packets-lost">–</span></div>
-            <div class="hud-row"><span>Jitter:</span> <span id="hud-jitter">–</span></div>
-          </div>
-          
+          <button id="custom-fullscreen-btn" class="control-btn">⛶</button>
         </div>
-        
-        <!-- WebRTC Streaming Controls (Host Only) - OUTSIDE VIDEO CONTAINER -->
-        <div id="webrtc-controls" class="webrtc-controls" style="display: none;">
-          <div class="webrtc-status">
-            <span class="live-indicator">LIVE</span>
-            <span id="viewer-count">0 watching</span>
-          </div>
-          <button id="start-webrtc-camera-btn" class="btn btn-live">
-            📷 Start Camera
-          </button>
-          <button id="start-webrtc-screen-btn" class="btn btn-secondary">
-            🖥️ Start Screen Share
-          </button>
-          <button id="stop-webrtc-btn" class="btn btn-danger" style="display: none;">
-            ⏹ Stop Stream
-          </button>
+
+        <button id="mobile-chat-btn" class="mobile-chat-btn" title="Chat">💬</button>
+        <button id="rotate-btn" class="rotate-btn" title="Lock rotation"><span id="lock-icon">🔓</span></button>
+        <button id="exit-fullscreen-btn" class="exit-fullscreen-btn">⌕</button>
+
+        <div id="webrtc-hud" style="display:none">
+          <div class="hud-title">📡 WebRTC Stats</div>
+          <div class="hud-row"><span>Resolution</span><span id="hud-res">–</span></div>
+          <div class="hud-row"><span>Bitrate</span><span id="hud-bitrate">–</span></div>
+          <div class="hud-row"><span>FPS</span><span id="hud-fps">–</span></div>
+          <div class="hud-row"><span>Packet Loss</span><span id="hud-packets-lost">–</span></div>
+          <div class="hud-row"><span>Jitter</span><span id="hud-jitter">–</span></div>
         </div>
-        
-        <!-- Local Preview for Host (shows their own camera) -->
-        <div id="local-preview-container" class="local-preview-container" style="display: none;">
-          <video id="local-preview" autoplay muted playsinline></video>
-          <span class="preview-label">Your Camera</span>
+      </div>
+
+      <!-- WebRTC controls -->
+      <div id="webrtc-controls" class="webrtc-controls" style="display:none">
+        <div class="webrtc-status">
+          <span class="live-indicator">LIVE</span>
+          <span id="viewer-count">0 watching</span>
         </div>
-        
-        <!-- Viewer Notice -->
-        <div id="viewer-notice" class="viewer-notice" style="display: none;">
-          <p id="viewer-notice-text">Host is controlling playback - your video will sync automatically</p>
-          <button id="join-webrtc-btn" class="btn btn-secondary" style="display: none;">
-            Join WebRTC Stream
-          </button>
+        <button id="start-webrtc-camera-btn" class="btn btn-live">📷 Camera</button>
+        <button id="start-webrtc-screen-btn" class="btn btn-secondary">🖥️ Screen Share</button>
+        <button id="stop-webrtc-btn" class="btn btn-danger" style="display:none">⏹ Stop</button>
+      </div>
+
+      <!-- Local preview -->
+      <div id="local-preview-container" class="local-preview-container" style="display:none">
+        <video id="local-preview" autoplay muted playsinline></video>
+        <span class="preview-label">Your Camera</span>
+      </div>
+
+      <!-- Viewer notice -->
+      <div id="viewer-notice" class="viewer-notice" style="display:none">
+        <p id="viewer-notice-text">Host is controlling playback</p>
+        <button id="join-webrtc-btn" class="btn btn-secondary" style="display:none">Join Stream</button>
+      </div>
+
+      <!-- Host controls -->
+      <div id="host-controls" class="host-controls" style="display:none">
+
+        <div class="video-url-input" id="url-input-section" style="display:none">
+          <input type="text" id="video-url" placeholder="Paste video URL (MP4)…">
+          <button id="load-video-btn" class="btn btn-small">Load</button>
         </div>
-        
-        <!-- Host Controls (URL Mode) -->
-        <div id="host-controls" class="host-controls" style="display: none;">
-          <!-- URL Mode Controls -->
-          <div class="video-url-input" id="url-input-section">
-            <input type="text" id="video-url" placeholder="Enter video URL (MP4) or select from uploads">
-            <button id="load-video-btn" class="btn btn-small">Load Video</button>
+
+        <div class="uploaded-videos-section" id="uploaded-videos-section" style="display:none">
+          <h4>📁 Uploaded Videos <span id="video-count" class="video-count">(0)</span></h4>
+          <div id="uploaded-videos-list" class="uploaded-videos-list">
+            <p class="loading-text">Loading videos</p>
           </div>
-          
-          <!-- Uploaded Videos Section -->
-          <div class="uploaded-videos-section" id="uploaded-videos-section">
-            <h4>📁 Uploaded Videos <span id="video-count" class="video-count">(0)</span></h4>
-            <div id="uploaded-videos-list" class="uploaded-videos-list">
-              <p class="loading-text">Loading videos...</p>
-            </div>
-          </div>
-          
-          <!-- MSE Upload Section (Progressive Upload) -->
-          <div class="mse-upload-section" id="mse-upload-section" style="display: none;">
-            <h4>📤 Progressive Upload (MSE)</h4>
-            <p class="mse-info">Upload video in chunks - viewers can start watching before upload finishes!</p>
-            
-            <!-- MSE Drag & Drop Zone -->
-            <div id="mse-drop-zone" class="drop-zone mse-drop-zone">
-              <div class="drop-zone-content">
-                <span class="drop-icon">🎬</span>
-                <p>Drag & drop video file for MSE streaming</p>
-                <p class="drop-hint">or click to browse (MP4 recommended)</p>
-                <input type="file" id="mse-file-input" accept="video/mp4,video/*" style="display: none;">
-              </div>
-              
-              <!-- MSE Upload Progress -->
-              <div id="mse-upload-progress" class="upload-progress" style="display: none;">
-                <div class="progress-bar">
-                  <div id="mse-progress-fill" class="progress-fill"></div>
-                </div>
-                <p id="mse-upload-status">Initializing...</p>
-                <div id="mse-buffer-status" class="buffer-status"></div>
-              </div>
-            </div>
-            
-            <!-- MSE Viewer Notice -->
-            <div id="mse-viewer-notice" class="viewer-notice" style="display: none;">
-              <p>📤 Host is uploading video progressively</p>
-              <p id="mse-upload-progress-text">Waiting for upload...</p>
-              <div class="progress-bar small">
-                <div id="mse-viewer-progress" class="progress-fill"></div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Drag & Drop Upload Zone (Legacy) -->
-          <div id="drop-zone" class="drop-zone">
+        </div>
+
+        <div class="mse-upload-section" id="mse-upload-section" style="display:none">
+          <h4>📤 Progressive Upload</h4>
+          <p class="mse-info">Viewers watch while you upload — MP4 only</p>
+          <div id="mse-drop-zone" class="drop-zone mse-drop-zone">
             <div class="drop-zone-content">
-              <span class="drop-icon">📤</span>
-              <p>Drag & drop video file here</p>
+              <span class="drop-icon">🎬</span>
+              <p>Drag & drop MP4 here</p>
               <p class="drop-hint">or click to browse</p>
-              <input type="file" id="file-input" accept="video/*" style="display: none;">
+              <input type="file" id="mse-file-input" accept="video/mp4,video/*" style="display:none">
             </div>
-            <div id="upload-progress" class="upload-progress" style="display: none;">
-              <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill"></div>
-              </div>
-              <p id="upload-status">Uploading...</p>
+            <div id="mse-upload-progress" class="upload-progress" style="display:none">
+              <div class="progress-bar"><div id="mse-progress-fill" class="progress-fill"></div></div>
+              <p id="mse-upload-status">Initializing…</p>
+              <div id="mse-buffer-status" class="buffer-status"></div>
             </div>
           </div>
-          
-          <p class="host-notice">You are the host - others will sync to your video</p>
-          <div id="video-info" class="video-info" style="display: none;"></div>
+          <div id="mse-viewer-notice" class="viewer-notice" style="display:none">
+            <p>📤 Host is uploading</p>
+            <p id="mse-upload-progress-text">Waiting…</p>
+            <div class="progress-bar small"><div id="mse-viewer-progress" class="progress-fill"></div></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Chat Section -->
-      <div class="chat-section" id="chat-section">
-        <div class="chat-header">
-          <h3>Chat</h3>
-          <button id="chat-toggle" class="btn btn-small" style="display: none;">🗗</button>
+        <div id="drop-zone" class="drop-zone" style="display:none">
+          <div class="drop-zone-content">
+            <span class="drop-icon">📤</span>
+            <p>Drag & drop video here</p>
+            <p class="drop-hint">or click to browse · max 5GB</p>
+            <input type="file" id="file-input" accept="video/*" style="display:none">
+          </div>
+          <div id="upload-progress" class="upload-progress" style="display:none">
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+            <p id="upload-status">Uploading…</p>
+          </div>
         </div>
-        <div id="chat-messages" class="chat-messages"></div>
-        <div class="chat-input-container">
-          <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500">
-          <button id="send-chat-btn" class="btn btn-primary">Send</button>
-        </div>
-      </div>
-      
-      <!-- Exit Theater Mode Button -->
-      <button id="exit-theater-btn" class="exit-theater-btn">Exit Fullscreen ⌨</button>
-      
-      <!-- Chat Overlay for Fullscreen Mode -->
-      <div id="chat-overlay" class="chat-overlay">
-        <div class="chat-overlay-header">
-          <span class="chat-overlay-title">Chat</span>
-          <button id="chat-overlay-close" class="chat-overlay-close">✕</button>
-        </div>
-        <div id="chat-overlay-content" class="chat-overlay-content">
-          <div id="chat-overlay-messages" class="chat-messages"></div>
-        </div>
-        <div class="chat-input-area">
-          <input type="text" id="chat-overlay-input" placeholder="Type a message..." maxlength="500">
-          <button id="chat-overlay-send" class="btn btn-primary">Send</button>
-        </div>
+
+        <p class="host-notice">You are the host — others sync to you</p>
+        <div id="video-info" class="video-info" style="display:none"></div>
       </div>
     </div>
 
-    <div class="room-footer">
-      <button id="leave-room-btn" class="btn btn-danger">Leave Room</button>
+    <!-- Chat -->
+    <div class="chat-section" id="chat-section">
+      <div class="chat-header">
+        <h3>Live Chat</h3>
+        <button id="chat-toggle" class="btn btn-small" style="display:none">✕</button>
+      </div>
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Say something…" maxlength="500">
+        <button id="send-chat-btn" class="btn btn-primary">↑</button>
+      </div>
     </div>
+
+    <button id="exit-theater-btn" class="exit-theater-btn">Exit Fullscreen</button>
+
+    <!-- Chat overlay (fullscreen) -->
+    <div id="chat-overlay" class="chat-overlay">
+      <div class="chat-overlay-header">
+        <span class="chat-overlay-title">Chat</span>
+        <button id="chat-overlay-close" class="chat-overlay-close">✕</button>
+      </div>
+      <div id="chat-overlay-content" class="chat-overlay-content">
+        <div id="chat-overlay-messages" class="chat-messages"></div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-overlay-input" placeholder="Say something…" maxlength="500">
+        <button id="chat-overlay-send" class="btn btn-primary" style="padding:8px 14px">↑</button>
+      </div>
+    </div>
+
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="app.js"></script>
-  <script src="mse-player.js"></script>
-  <script src="pure-webrtc.js"></script>
+  <div class="room-footer">
+    <button id="leave-room-btn" class="btn btn-danger">Leave Room</button>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // ── Animated particles ──────────────────────────────────
+  (function() {
+    const container = document.getElementById('particles');
+    const count = window.innerWidth < 600 ? 8 : 18;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 3 + 1;
+      p.style.cssText = [
+        `width:${size}px`,
+        `height:${size}px`,
+        `left:${Math.random() * 100}%`,
+        `animation-duration:${Math.random() * 12 + 8}s`,
+        `animation-delay:${Math.random() * 10}s`
+      ].join(';');
+      container.appendChild(p);
+    }
+  })();
+</script>
+<script src="app.js"></script>
+<script src="mse-player.js"></script>
+<script src="pure-webrtc.js"></script>
 </body>
 </html>
