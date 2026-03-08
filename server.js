@@ -52,6 +52,9 @@ const streamifier = require('streamifier');
 // MSE Streaming module (Progressive upload + MSE playback)
 const { initMSEUpload } = require('./server-mse');
 
+// ICE Config route (for WebRTC TURN credentials)
+const iceConfig = require('./ice-config');
+
 // ============================================
 // CLOUDINARY CONFIGURATION (Free Cloud Storage)
 // ============================================
@@ -104,6 +107,9 @@ app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
 // Initialize MSE Streaming endpoints
 initMSEUpload(app);
+
+// ICE Config endpoint for WebRTC TURN credentials
+app.use('/api/ice-config', iceConfig);
 
 // ============================================
 // FILE UPLOAD CONFIGURATION
