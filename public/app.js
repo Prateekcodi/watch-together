@@ -214,7 +214,8 @@ class WatchTogether {
       return;
     }
     
-    if (window.innerWidth <= 768) {
+    // Portrait only - in landscape, chat is always visible
+    if (window.innerWidth <= 768 && window.innerHeight > window.innerWidth) {
       chatSection.classList.toggle('open');
       chatToggle.style.display = chatSection.classList.contains('open') ? 'flex' : 'none';
     }
