@@ -2011,10 +2011,9 @@ class WatchTogether {
     
     // Show notification if chat is hidden (mobile or fullscreen)
     const chatSection = document.getElementById('chat-section');
-    const chatHidden = window.innerWidth <= 900 && !chatSection?.classList.contains('open');
-    const isFullscreen = document.fullscreenElement || document.body.classList.contains('theater-mode');
+    const chatHidden = (window.innerWidth <= 900 && !chatSection?.classList.contains('open')) || (document.fullscreenElement || document.body.classList.contains('theater-mode'));
     
-    if (chatHidden || isFullscreen) {
+    if (chatHidden) {
       // Don't show notification for own messages
       if (message.userName !== this.userName) {
         // Remove existing notification first
