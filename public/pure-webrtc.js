@@ -285,6 +285,9 @@ class PureWebRTC {
     videoEl.setAttribute('playsinline', '');
     videoEl.setAttribute('webkit-playsinline', '');
     
+    // Add class to enable native controls during WebRTC
+    videoEl.classList.add('webrtc-active');
+    
     // Keep native controls available for WebRTC too
     videoEl.setAttribute('controls', '');
 
@@ -405,6 +408,7 @@ class PureWebRTC {
     if (this.videoElement) {
       this.videoElement.srcObject = null;
       this.videoElement.muted = false;
+      this.videoElement.classList.remove('webrtc-active');
       // Restore video element attributes for regular playback
       this.videoElement.removeAttribute('playsinline');
       this.videoElement.setAttribute('controls', '');
