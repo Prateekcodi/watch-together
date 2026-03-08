@@ -310,16 +310,31 @@ class PureWebRTC {
       'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
       'cursor:pointer', 'z-index:100', 'touch-action:manipulation', 'gap:12px'
     ].join(';');
-    overlay.innerHTML = [
-      '<div style="background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.5);',
-      'border-radius:50%;width:72px;height:72px;',
-      'display:flex;align-items:center;justify-content:center;font-size:28px;">▶</div>',
-      '<span style="color:white;font-size:14px;opacity:0.8;">Tap to watch</span>'
+    
+    // Create buttons container
+    const buttonsHTML = [
+      '<div style="display:flex;gap:16px;align-items:center;">',
+        '<div id="webrtc-play-btn" style="',
+          'background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.5);',
+          'border-radius:50%;width:72px;height:72px;',
+          'display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;">▶</div>',
+        '<div id="webrtc-fullscreen-btn" style="',
+          'background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.5);',
+          'border-radius:50%;width:56px;height:56px;',
+          'display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;" title="Fullscreen">⛶</div>',
+      '</div>',
+      '<span style="color:white;font-size:14px;opacity:0.8;">Tap ▶ to watch</span>'
     ].join('');
+    
+    overlay.innerHTML = buttonsHTML;
 
     container.style.position = 'relative';
     container.appendChild(overlay);
 
+    // Play button handler
+    const playBtn = document.getElementById('webrtc-play-btn');
+    const fullscreenBtn = document.getElementById('webrtc-fullscreen-btn');
+    
     const play = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -328,14 +343,34 @@ class PureWebRTC {
       videoEl.play().then(() => {
         this._removeTapOverlay();
       }).catch(() => {
-        // Let user try again
         overlay.addEventListener('pointerdown', play);
         overlay.addEventListener('click', play);
       });
     };
 
+    // Fullscreen button handler
+    const toggleFullscreen = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (videoEl.requestFullscreen) {
+        videoEl.requestFullscreen();
+      } else if (videoEl.webkitRequestFullscreen) {
+        videoEl.webkitRequestFullscreen();
+      }
+    };
+
     overlay.addEventListener('pointerdown', play);
     overlay.addEventListener('click', play);
+    if (playBtn) {
+      playBtn.addEventListener('pointerdown', play);
+      playBtn.addEventListener('click', play);
+    }
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('pointerdown', toggleFullscreen);
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
   }
 
   _removeTapOverlay() {
