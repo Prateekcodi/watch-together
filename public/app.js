@@ -266,6 +266,9 @@ class WatchTogether {
       
       videoContainer.addEventListener('touchend', toggle, { passive: false });
       videoContainer.addEventListener('click', toggle);
+      
+      // Mouse movement on desktop shows controls
+      videoContainer.addEventListener('mousemove', () => showControls());
     }
     
     // Play/Pause toggle
@@ -305,6 +308,8 @@ class WatchTogether {
       if (progress && this.videoPlayer.duration) {
         const value = (this.videoPlayer.currentTime / this.videoPlayer.duration) * 100;
         progress.value = value;
+        // Update red fill progress
+        progress.style.background = `linear-gradient(to right, var(--red) ${value}%, rgba(255,255,255,0.2) ${value}%)`;
       }
       this.updateTimeDisplay();
     });
