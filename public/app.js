@@ -2025,6 +2025,7 @@ class WatchTogether {
       '<div class="message-text">' + this.escapeHtml(message.message) + '</div>' +
       (videoTimeStr ? '<div class="video-timestamp">' + videoTimeStr + '</div>' : '');
     
+    console.log('Adding message:', message.userName, '|', message.message);
     container.appendChild(messageEl);
     container.scrollTop = container.scrollHeight;
     

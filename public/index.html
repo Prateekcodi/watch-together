@@ -1574,6 +1574,18 @@
     #video-container:-webkit-full-screen #custom-controls {
       border-radius: 0;
     }
+
+    /* Force message text visible */
+    .chat-message .message-text,
+    .chat-message.own-message .message-text {
+      color: #f0f0f0 !important;
+      opacity: 1 !important;
+    }
+
+    .chat-message .message-text {
+      min-height: 36px;
+      display: block;
+    }
   </style>
 </head>
 <body>
