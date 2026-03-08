@@ -284,10 +284,16 @@ class PureWebRTC {
     videoEl.playsInline = true;
     videoEl.setAttribute('playsinline', '');
     videoEl.setAttribute('webkit-playsinline', '');
-    videoEl.removeAttribute('controls');
+    
+    // Keep native controls available for WebRTC too
+    videoEl.setAttribute('controls', '');
 
+    // Show custom controls for live stream too (fullscreen, etc)
     const customControls = document.getElementById('custom-controls');
-    if (customControls) customControls.style.display = 'none';
+    if (customControls) {
+      customControls.style.display = '';
+      customControls.style.removeProperty('display');
+    }
 
     videoEl.play().then(() => {
       console.log('[WebRTC] Video playing');
