@@ -241,45 +241,31 @@ class WatchTogether {
     const showControls = () => {
       if (customControls) {
         customControls.classList.remove('hidden');
-        videoContainer.classList.add('show-controls');
+        customControls.style.opacity = '1';
+        customControls.style.pointerEvents = 'auto';
       }
-      this.isControlsVisible = true;
-      
-      // Clear existing timer
-      if (this.controlsHideTimer) {
-        clearTimeout(this.controlsHideTimer);
-      }
-      
-      // Hide after 5 seconds if video is playing (WebRTC streaming too)
-      if (!this.videoPlayer.paused && this.videoPlayer.srcObject) {
+      clearTimeout(this.controlsHideTimer);
+      if (!this.videoPlayer.paused) {
         this.controlsHideTimer = setTimeout(() => {
-          if (customControls && this.videoPlayer.srcObject) {
-            customControls.classList.add('hidden');
-            videoContainer.classList.remove('show-controls');
-          }
-          this.isControlsVisible = false;
-        }, 5000);
+          customControls?.classList.add('hidden');
+        }, 3000);
       }
     };
     
     // Touch/click on video container to toggle controls
     if (videoContainer) {
       // Use touchend for mobile, click for desktop
-      const toggleControls = (e) => {
+      const toggle = (e) => {
         e.preventDefault();
-        if (this.isControlsVisible) {
-          if (customControls) {
-            customControls.classList.add('hidden');
-            videoContainer.classList.remove('show-controls');
-          }
-          this.isControlsVisible = false;
-        } else {
+        if (customControls?.classList.contains('hidden')) {
           showControls();
+        } else {
+          customControls?.classList.add('hidden');
         }
       };
       
-      videoContainer.addEventListener('touchend', toggleControls, { passive: false });
-      videoContainer.addEventListener('click', toggleControls);
+      videoContainer.addEventListener('touchend', toggle, { passive: false });
+      videoContainer.addEventListener('click', toggle);
     }
     
     // Play/Pause toggle
