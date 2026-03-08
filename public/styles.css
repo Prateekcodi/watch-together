@@ -804,6 +804,27 @@ input[type="text"]:focus {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) rgba(255,255,255,0.1);
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--red);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #ff4444;
 }
 
 .chat-message {
