@@ -2006,7 +2006,7 @@ class WatchTogether {
     const container = document.getElementById('chat-messages');
     const messageEl = document.createElement('div');
     const isOwn = message.userName === this.userName;
-    const isReaction = message.isReaction || /^\p{Emoji}+$/u.test(message.message.trim());
+    const isReaction = message.isReaction || false;
     messageEl.className = 'chat-message' + (isOwn ? ' own-message' : '') + (isReaction ? ' is-reaction' : '');
     messageEl.dataset.messageId = message.id;
     

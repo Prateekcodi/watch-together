@@ -1227,6 +1227,11 @@
       border-color: rgba(59,130,246,0.2);
       border-radius: 12px 4px 12px 12px;
       color: var(--text);
+      max-width: 85%;
+    }
+
+    .message-text {
+      max-width: 85%;
     }
 
     /* Reaction message */
@@ -1468,12 +1473,21 @@
       .chat-section {
         border-left: none;
         border-top: 1px solid var(--border);
-        max-height: 300px;
+        min-height: 250px;
+        max-height: 350px;
         display: none;
         animation: none;
       }
 
-      .chat-section.open { display: flex; }
+      .chat-section.open {
+        display: flex;
+        min-height: 300px;
+        max-height: 400px;
+      }
+
+      .chat-messages {
+        min-height: 150px;
+      }
       #chat-toggle { display: inline-flex !important; }
       .mobile-chat-btn { display: flex !important; }
       .landing-options { grid-template-columns: 1fr; }
