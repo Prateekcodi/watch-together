@@ -2017,13 +2017,34 @@ class WatchTogether {
       ? ' @ ' + this.formatVideoTime(message.videoTime)
       : '';
     
-    messageEl.innerHTML = 
-      '<div class="message-header">' +
-        '<span class="user-name">' + this.escapeHtml(message.userName) + '</span>' +
-        '<span class="message-time">' + timeStr + '</span>' +
-      '</div>' +
-      '<div class="message-text">' + this.escapeHtml(message.message) + '</div>' +
-      (videoTimeStr ? '<div class="video-timestamp">' + videoTimeStr + '</div>' : '');
+    // Build message DOM elements using DOM methods instead of innerHTML
+    const headerEl = document.createElement('div');
+    headerEl.className = 'message-header';
+    
+    const nameEl = document.createElement('span');
+    nameEl.className = 'user-name';
+    nameEl.textContent = message.userName;
+    
+    const timeEl = document.createElement('span');
+    timeEl.className = 'message-time';
+    timeEl.textContent = timeStr;
+    
+    headerEl.appendChild(nameEl);
+    headerEl.appendChild(timeEl);
+    
+    const textEl = document.createElement('div');
+    textEl.className = 'message-text';
+    textEl.textContent = message.message;
+    
+    messageEl.appendChild(headerEl);
+    messageEl.appendChild(textEl);
+    
+    if (videoTimeStr) {
+      const videoTimeEl = document.createElement('div');
+      videoTimeEl.className = 'video-timestamp';
+      videoTimeEl.textContent = videoTimeStr;
+      messageEl.appendChild(videoTimeEl);
+    }
     
     console.log('Adding message:', message.userName, '|', message.message);
     container.appendChild(messageEl);
