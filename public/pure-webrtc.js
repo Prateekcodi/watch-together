@@ -364,9 +364,16 @@ class PureWebRTC {
     if (this.videoElement) {
       this.videoElement.srcObject = null;
       this.videoElement.muted = false;
+      // Restore video element attributes for regular playback
+      this.videoElement.removeAttribute('playsinline');
+      this.videoElement.setAttribute('controls', '');
     }
+    // Restore custom controls - remove inline style to let CSS take over
     const customControls = document.getElementById('custom-controls');
-    if (customControls) customControls.style.display = '';
+    if (customControls) {
+      customControls.style.display = '';
+      customControls.style.removeProperty('display');
+    }
   }
 
   async cleanup() {
